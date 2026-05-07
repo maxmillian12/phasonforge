@@ -52,7 +52,7 @@ function PostPage() {
         <h1 className="font-display uppercase text-4xl md:text-5xl font-extrabold mb-6 leading-tight">{post.title}</h1>
         <p className="text-xl text-muted-foreground mb-8 leading-relaxed">{post.excerpt}</p>
         <div className="prose prose-lg max-w-none text-foreground leading-relaxed">
-          {post.body.split("\n").map((para, i) => <p key={i} className="mb-4">{para}</p>)}
+          {post.body.split("\n").map((para: string, i: number) => <p key={i} className="mb-4">{para}</p>)}
         </div>
       </div>
     </article>

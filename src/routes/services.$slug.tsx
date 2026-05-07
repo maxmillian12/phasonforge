@@ -52,7 +52,7 @@ function ServiceDetail() {
           <div className="lg:col-span-2">
             <h2 className="section-title text-3xl mb-6">What we deliver</h2>
             <ul className="space-y-4">
-              {service.features.map((f) => (
+              {service.features.map((f: string) => (
                 <li key={f} className="flex gap-3 items-start border-b border-border pb-4">
                   <CheckCircle2 className="h-5 w-5 text-[var(--primary)] mt-1 shrink-0" />
                   <span className="text-foreground">{f}</span>
