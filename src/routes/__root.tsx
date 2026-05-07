@@ -78,11 +78,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Phason Engineering Works Limited — Structures That Stand The Test Of Time" },
       { name: "description", content: "Phason Engineering Works Limited delivers civil, structural and electrical engineering plus diversified supply solutions across Tanzania." },
       { name: "author", content: "Phason Engineering Works Limited" },
-      { property: "og:title", content: "Phason Engineering Works Limited" },
-      { property: "og:description", content: "Civil, structural & electrical engineering and supply solutions in Tanzania." },
+      { property: "og:title", content: "Phason Engineering Works Limited — Structures That Stand The Test Of Time" },
+      { property: "og:description", content: "Phason Engineering Works Limited delivers civil, structural and electrical engineering plus diversified supply solutions across Tanzania." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Phason Engineering Works Limited — Structures That Stand The Test Of Time" },
+      { name: "twitter:description", content: "Phason Engineering Works Limited delivers civil, structural and electrical engineering plus diversified supply solutions across Tanzania." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/00ac8755-9f12-42b3-b29d-3187a94f20c9" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/00ac8755-9f12-42b3-b29d-3187a94f20c9" },
     ],
     links: [
       {
