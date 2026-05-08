@@ -167,9 +167,9 @@
 
   .lime-underline {
     background-image: linear-gradient(var(--primary), var(--primary));
-    background-size: 100% 0.35em;
+    background-size: 100% 0.12em;
     background-repeat: no-repeat;
-    background-position: 0 88%;
+    background-position: 0 100%;
     padding: 0 0.1em;
   }
 
