@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LogOut, FileText, Briefcase, Users, MessageSquare, Settings } from "lucide-react";
-import { SERVICES, PROJECTS, BLOG } from "@/lib/content";
+import { SERVICES, PROJECTS, POSTS } from "@/lib/content";
 
 export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
@@ -30,7 +30,7 @@ function AdminDashboard() {
   const stats = [
     { label: "Services", count: SERVICES.length, icon: Briefcase },
     { label: "Projects", count: PROJECTS.length, icon: FileText },
-    { label: "Blog Posts", count: BLOG.length, icon: MessageSquare },
+    { label: "Blog Posts", count: POSTS.length, icon: MessageSquare },
     { label: "Team Members", count: 58, icon: Users },
   ];
 
