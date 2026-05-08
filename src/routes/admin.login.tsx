@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, type FormEvent } from "react";
 import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/admin/login")({
@@ -9,46 +8,22 @@ export const Route = createFileRoute("/admin/login")({
 
 function AdminLogin() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/admin" });
-    });
-  }, [navigate]);
-
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/admin`,
-            data: { display_name: displayName || email.split("@")[0] },
-          },
-        });
-        if (signUpError) throw signUpError;
-      }
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw signInError;
-      navigate({ to: "/admin" });
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
-    } finally {
-      setLoading(false);
+    if (!username.trim()) {
+      setError("Enter a username");
+      return;
     }
+    if (password !== "1122") {
+      setError("Invalid password");
+      return;
+    }
+    sessionStorage.setItem("phason_admin", username.trim());
+    navigate({ to: "/admin" });
   };
 
   return (
@@ -63,7 +38,7 @@ function AdminLogin() {
           </div>
           <div>
             <h1 className="font-display uppercase text-2xl font-extrabold text-[var(--ink)]">
-              {mode === "signin" ? "Admin Login" : "Create Account"}
+              Admin Login
             </h1>
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
               Phason CMS Access
@@ -71,29 +46,14 @@ function AdminLogin() {
           </div>
         </div>
 
-        {mode === "signup" && (
-          <label className="block mb-4">
-            <span className="text-xs font-mono uppercase tracking-wider text-[var(--ink)]">
-              Display Name
-            </span>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="mt-1 w-full border border-input px-3 py-2 focus:outline-none focus:border-[var(--primary)]"
-            />
-          </label>
-        )}
-
         <label className="block mb-4">
           <span className="text-xs font-mono uppercase tracking-wider text-[var(--ink)]">
-            Email
+            Username
           </span>
           <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="mt-1 w-full border border-input px-3 py-2 focus:outline-none focus:border-[var(--primary)]"
             autoFocus
           />
@@ -105,8 +65,6 @@ function AdminLogin() {
           </span>
           <input
             type="password"
-            required
-            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full border border-input px-3 py-2 focus:outline-none focus:border-[var(--primary)]"
@@ -117,34 +75,13 @@ function AdminLogin() {
           <div className="mb-4 text-sm text-destructive font-mono">{error}</div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-primary w-full justify-center disabled:opacity-50"
-        >
-          {loading
-            ? "Please wait..."
-            : mode === "signin"
-            ? "Sign In"
-            : "Create Account & Sign In"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "signin" ? "signup" : "signin");
-            setError("");
-          }}
-          className="mt-4 w-full text-sm font-mono text-muted-foreground hover:text-[var(--ink)]"
-        >
-          {mode === "signin"
-            ? "Need an account? Sign up"
-            : "Already have an account? Sign in"}
+        <button type="submit" className="btn-primary w-full justify-center">
+          Sign In
         </button>
 
         <Link
           to="/"
-          className="block mt-2 text-center text-xs font-mono text-muted-foreground hover:text-[var(--ink)]"
+          className="block mt-4 text-center text-xs font-mono text-muted-foreground hover:text-[var(--ink)]"
         >
           ← Back to website
         </Link>
