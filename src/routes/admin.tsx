@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, FileText, Briefcase, Users, MessageSquare, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { LogOut, FileText, Briefcase, Users, MessageSquare, Settings, ShieldCheck, ShieldAlert } from "lucide-react";
 import { SERVICES, PROJECTS, POSTS } from "@/lib/content";
 
 export const Route = createFileRoute("/admin")({
@@ -9,23 +10,59 @@ export const Route = createFileRoute("/admin")({
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{ email: string; displayName: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const u = sessionStorage.getItem("phason_admin");
-    if (!u) {
-      navigate({ to: "/admin/login" });
-    } else {
-      setUser(u);
-    }
+    let mounted = true;
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      if (!session) {
+        navigate({ to: "/admin/login" });
+      }
+    });
+
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate({ to: "/admin/login" });
+        return;
+      }
+
+      const [{ data: profile }, { data: roleRow }] = await Promise.all([
+        supabase.from("profiles").select("display_name, email").eq("user_id", session.user.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin").maybeSingle(),
+      ]);
+
+      if (!mounted) return;
+      setUser({
+        email: session.user.email ?? "",
+        displayName: profile?.display_name ?? session.user.email?.split("@")[0] ?? "User",
+      });
+      setIsAdmin(!!roleRow);
+      setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
-  if (!user) return null;
-
-  const logout = () => {
-    sessionStorage.removeItem("phason_admin");
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate({ to: "/admin/login" });
   };
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center">
+        <div className="font-mono text-sm text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   const stats = [
     { label: "Services", count: SERVICES.length, icon: Briefcase },
@@ -37,13 +74,14 @@ function AdminDashboard() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-muted/30">
       <div className="bg-[var(--ink)] text-white">
-        <div className="container-x flex items-center justify-between py-6">
+        <div className="container-x flex items-center justify-between py-6 flex-wrap gap-4">
           <div>
             <h1 className="font-display uppercase text-3xl font-extrabold">
               Admin <span className="text-[var(--primary)]">Dashboard</span>
             </h1>
             <p className="text-sm font-mono text-white/60 mt-1">
-              Welcome back, <span className="text-[var(--primary)]">{user}</span>
+              Welcome back, <span className="text-[var(--primary)]">{user.displayName}</span>
+              <span className="text-white/40"> · {user.email}</span>
             </p>
           </div>
           <button
@@ -56,6 +94,25 @@ function AdminDashboard() {
       </div>
 
       <div className="container-x py-10">
+        {!isAdmin && (
+          <div className="mb-6 p-5 bg-amber-50 border-l-4 border-amber-500 flex items-start gap-3">
+            <ShieldAlert className="h-5 w-5 text-amber-700 mt-0.5 shrink-0" />
+            <div className="font-mono text-sm text-amber-900">
+              <strong>Standard user access.</strong> You're signed in but don't have the <code className="px-1 bg-amber-100">admin</code> role yet.
+              The first admin must be assigned in the backend (Cloud → Database → user_roles table). Add a row with your user ID and role <code className="px-1 bg-amber-100">admin</code>.
+            </div>
+          </div>
+        )}
+
+        {isAdmin && (
+          <div className="mb-6 p-5 bg-emerald-50 border-l-4 border-emerald-500 flex items-center gap-3">
+            <ShieldCheck className="h-5 w-5 text-emerald-700 shrink-0" />
+            <div className="font-mono text-sm text-emerald-900">
+              <strong>Admin access granted.</strong> You have full management permissions.
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {stats.map((s) => (
             <div key={s.label} className="bg-white p-6 border-l-4 border-[var(--primary)]">
@@ -77,14 +134,6 @@ function AdminDashboard() {
           <ManageCard title="Team" desc="Update personnel records" to="/about" />
           <ManageCard title="Inquiries" desc="View contact submissions" to="/contact" />
           <ManageCard title="Site Settings" desc="Company info & branding" to="/" icon={Settings} />
-        </div>
-
-        <div className="mt-10 p-6 bg-yellow-50 border-l-4 border-yellow-500">
-          <p className="font-mono text-sm text-yellow-900">
-            <strong>Note:</strong> This is a demo admin area with client-side authentication.
-            For production, enable Lovable Cloud to add secure authentication, persistent sessions,
-            and real content editing backed by a database.
-          </p>
         </div>
       </div>
     </div>
