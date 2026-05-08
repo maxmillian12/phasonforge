@@ -13,12 +13,14 @@ import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AgriculturalSuppliesRouteImport } from './routes/agricultural-supplies'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
@@ -38,6 +40,11 @@ const ContactRoute = ContactRouteImport.update({
 const AgriculturalSuppliesRoute = AgriculturalSuppliesRouteImport.update({
   id: '/agricultural-supplies',
   path: '/agricultural-supplies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -70,14 +77,21 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agricultural-supplies': typeof AgriculturalSuppliesRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/blog/': typeof BlogIndexRoute
@@ -86,10 +100,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agricultural-supplies': typeof AgriculturalSuppliesRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/blog': typeof BlogIndexRoute
@@ -99,10 +115,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agricultural-supplies': typeof AgriculturalSuppliesRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/blog/': typeof BlogIndexRoute
@@ -113,10 +131,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/agricultural-supplies'
     | '/contact'
     | '/faq'
     | '/projects'
+    | '/admin/login'
     | '/blog/$slug'
     | '/services/$slug'
     | '/blog/'
@@ -125,10 +145,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/agricultural-supplies'
     | '/contact'
     | '/faq'
     | '/projects'
+    | '/admin/login'
     | '/blog/$slug'
     | '/services/$slug'
     | '/blog'
@@ -137,10 +159,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/agricultural-supplies'
     | '/contact'
     | '/faq'
     | '/projects'
+    | '/admin/login'
     | '/blog/$slug'
     | '/services/$slug'
     | '/blog/'
@@ -150,6 +174,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AgriculturalSuppliesRoute: typeof AgriculturalSuppliesRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
@@ -188,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/agricultural-supplies'
       fullPath: '/agricultural-supplies'
       preLoaderRoute: typeof AgriculturalSuppliesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -232,12 +264,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   AgriculturalSuppliesRoute: AgriculturalSuppliesRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
