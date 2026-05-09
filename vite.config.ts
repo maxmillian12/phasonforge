@@ -28,9 +28,10 @@ async function netlifyConfig(): Promise<UserConfig> {
       tailwindcss(),
       tanstackStart({
         // Same SSR error wrapper used in the Cloudflare build.
+        // Without @cloudflare/vite-plugin in the chain, the SSR bundle
+        // defaults to a Node-compatible target — exactly what
+        // netlify/functions/ssr.mts needs.
         server: { entry: "server" },
-        // Node target — no Workers adapter.
-        target: "node-server",
       }),
       viteReact(),
     ],
