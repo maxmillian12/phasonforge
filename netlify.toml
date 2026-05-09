@@ -1,0 +1,31 @@
+[build]
+  command = "bun run build"
+  publish = "dist/client"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA / SSR fallback: any URL not matched by a static asset is handled by the SSR function.
+# This is what fixes "404 on refresh" for deep links like /admin/login.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/ssr"
+  status = 200
+  force = false
+
+[functions]
+  node_bundler = "esbuild"
+
+# Long-cache hashed Vite assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
