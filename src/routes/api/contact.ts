@@ -32,7 +32,7 @@ export const Route = createFileRoute("/api/contact")({
     handlers: {
       OPTIONS: ({ request }) => preflight(request),
 
-      POST: safeHandler(async (request) => {
+      POST: safeHandler(async ({ request }) => {
         const parsed = await parseJson(request, ContactSchema);
         if (!parsed.ok) return parsed.response;
 
@@ -43,8 +43,7 @@ export const Route = createFileRoute("/api/contact")({
 
         const { name, email, phone, subject, message } = parsed.data;
 
-        // Persist with the admin client (bypasses RLS for an insert-only table).
-        // Make sure a `contact_messages` table exists with matching columns.
+        // Persist via the admin client (insert-only table protected by RLS).
         const { error } = await supabaseAdmin
           .from("contact_messages")
           .insert({
@@ -54,7 +53,7 @@ export const Route = createFileRoute("/api/contact")({
             subject,
             message,
             user_agent: request.headers.get("user-agent") ?? null,
-          });
+          } as never);
 
         if (error) {
           console.error("[contact] insert failed:", error);

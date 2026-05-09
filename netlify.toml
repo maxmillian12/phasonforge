@@ -29,3 +29,15 @@
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# CORS for API endpoints — the SSR function also sets these per-request via
+# src/lib/api.ts, but Netlify edge headers are applied even when the function
+# is cold or short-circuited (e.g. preflight cached at the edge).
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    Access-Control-Max-Age = "86400"
+    Vary = "Origin"

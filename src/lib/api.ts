@@ -160,22 +160,23 @@ function flattenZodError(error: ZodError) {
 
 // ---------- Wrapper for safe handlers ----------
 
-type Handler = (request: Request) => Promise<Response> | Response;
+type HandlerCtx = { request: Request };
+type Handler = (ctx: HandlerCtx) => Promise<Response> | Response;
 
 /**
- * Wrap a handler so that any uncaught error becomes a CORS-aware 500
+ * Wrap a handler so any uncaught error becomes a CORS-aware 500 response
  * (instead of leaking a stack trace or breaking CORS on the client).
  */
 export function safeHandler(handler: Handler): Handler {
-  return async (request: Request) => {
+  return async (ctx: HandlerCtx) => {
     try {
-      return await handler(request);
+      return await handler(ctx);
     } catch (error) {
       console.error("[api] unhandled error:", error);
       return errorResponse("Internal server error", {
         status: 500,
         code: "INTERNAL_ERROR",
-        request,
+        request: ctx.request,
       });
     }
   };
