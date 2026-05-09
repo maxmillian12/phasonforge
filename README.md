@@ -108,9 +108,46 @@ The site uses a custom **"Lime & Ink"** theme with semantic design tokens define
 
 ## Deployment
 
-The site auto-deploys via Lovable on every change. To publish updates manually, click **Publish** in the Lovable editor.
+### Option A — Lovable (default, zero config)
 
-For a custom domain, go to **Project → Settings → Domains** in Lovable.
+The site auto-deploys via Lovable on every change. To publish updates manually, click **Publish** in the Lovable editor. For a custom domain, go to **Project → Settings → Domains** in Lovable.
+
+This runs on Cloudflare Workers via `@lovable.dev/vite-tanstack-config`.
+
+### Option B — Netlify (GitHub-driven)
+
+The repo is pre-configured for Netlify. Files involved:
+
+- `netlify.toml` — build command, publish dir, SPA-fallback redirect, security headers, asset caching
+- `netlify/functions/ssr.mts` — single SSR function that wraps TanStack Start's server entry; serves all unmatched routes (fixes 404-on-refresh)
+- `.env.example` — every variable Netlify needs
+
+#### One-time setup
+
+1. **Push to GitHub** — connect the repo via Lovable (Plus → GitHub → Connect project) or push manually.
+2. **Create a Netlify site** — "Import from Git" → pick the repo. Netlify auto-detects `netlify.toml`.
+3. **Set env vars** in Site settings → Environment variables (copy from `.env.example`):
+   - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` (build + runtime)
+   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (runtime, secret)
+4. **Build adapter swap** (required for Netlify Functions to actually serve SSR):
+   In `vite.config.ts`, the build currently targets Cloudflare Workers via the Lovable config. For Netlify Node SSR, replace the export with a plain TanStack Start + Vite config that targets Node (no `@cloudflare/vite-plugin`). Keep the Cloudflare config on a separate branch (e.g. `lovable`) so the in-editor preview keeps working — Netlify only builds the `main` branch.
+5. **Deploy** — push to `main`. Netlify builds, uploads `dist/client` to the CDN, and deploys `netlify/functions/ssr.mts`.
+
+#### What this gives you
+
+- ✅ One-click deploy on every GitHub push
+- ✅ Deep links and refreshes work (SPA fallback → SSR function)
+- ✅ All routes SSR'd by the same function (no per-route config)
+- ✅ Static assets long-cached at the edge
+- ✅ Security headers (X-Frame-Options, nosniff, Referrer-Policy)
+- ✅ Deploy previews on every PR
+- ✅ Custom domain via Site settings → Domain management
+
+#### Trade-offs
+
+- Netlify Function cold starts (~300–800 ms after idle) vs Cloudflare's near-zero cold start
+- The Lovable in-editor preview still uses Cloudflare; only the deployed Netlify site reflects Netlify behavior
+- Lovable Cloud (Supabase) backend works identically on either host
 
 ---
 
