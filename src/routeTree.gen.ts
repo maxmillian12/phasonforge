@@ -20,7 +20,9 @@ import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiContactRouteImport } from './routes/api/contact'
+import { Route as AdminStatusRouteImport } from './routes/admin.status'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const ProjectsRoute = ProjectsRouteImport.update({
@@ -78,10 +80,20 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiContactRoute = ApiContactRouteImport.update({
   id: '/api/contact',
   path: '/api/contact',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStatusRoute = AdminStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
@@ -98,7 +110,9 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/status': typeof AdminStatusRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/health': typeof ApiHealthRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/blog/': typeof BlogIndexRoute
@@ -113,7 +127,9 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/status': typeof AdminStatusRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/health': typeof ApiHealthRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/blog': typeof BlogIndexRoute
@@ -129,7 +145,9 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/status': typeof AdminStatusRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/health': typeof ApiHealthRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/blog/': typeof BlogIndexRoute
@@ -146,7 +164,9 @@ export interface FileRouteTypes {
     | '/faq'
     | '/projects'
     | '/admin/login'
+    | '/admin/status'
     | '/api/contact'
+    | '/api/health'
     | '/blog/$slug'
     | '/services/$slug'
     | '/blog/'
@@ -161,7 +181,9 @@ export interface FileRouteTypes {
     | '/faq'
     | '/projects'
     | '/admin/login'
+    | '/admin/status'
     | '/api/contact'
+    | '/api/health'
     | '/blog/$slug'
     | '/services/$slug'
     | '/blog'
@@ -176,7 +198,9 @@ export interface FileRouteTypes {
     | '/faq'
     | '/projects'
     | '/admin/login'
+    | '/admin/status'
     | '/api/contact'
+    | '/api/health'
     | '/blog/$slug'
     | '/services/$slug'
     | '/blog/'
@@ -192,6 +216,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   ProjectsRoute: typeof ProjectsRoute
   ApiContactRoute: typeof ApiContactRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
@@ -277,12 +302,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/contact': {
       id: '/api/contact'
       path: '/api/contact'
       fullPath: '/api/contact'
       preLoaderRoute: typeof ApiContactRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/status': {
+      id: '/admin/status'
+      path: '/status'
+      fullPath: '/admin/status'
+      preLoaderRoute: typeof AdminStatusRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/login': {
       id: '/admin/login'
@@ -296,10 +335,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminStatusRoute: typeof AdminStatusRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
+  AdminStatusRoute: AdminStatusRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -313,6 +354,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   ProjectsRoute: ProjectsRoute,
   ApiContactRoute: ApiContactRoute,
+  ApiHealthRoute: ApiHealthRoute,
   BlogSlugRoute: BlogSlugRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
