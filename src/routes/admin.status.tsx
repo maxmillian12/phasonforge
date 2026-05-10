@@ -68,18 +68,20 @@ function AdminStatus() {
           }),
         );
       } else {
-        setProbe("health", {
-          status: body.ok ? "ok" : "fail",
-          latencyMs: latency,
-          detail: body.ok ? undefined : "one or more checks failed",
-        });
+        setProbe(
+          "health",
+          body.ok
+            ? { status: "ok", latencyMs: latency }
+            : { status: "fail", latencyMs: latency, detail: "one or more checks failed" },
+        );
         for (const c of body.checks) {
           if (PROBE_ORDER.includes(c.name as ProbeKey)) {
-            setProbe(c.name as ProbeKey, {
-              status: c.ok ? "ok" : "fail",
-              latencyMs: 0,
-              detail: c.detail,
-            });
+            setProbe(
+              c.name as ProbeKey,
+              c.ok
+                ? { status: "ok", latencyMs: 0 }
+                : { status: "fail", latencyMs: 0, detail: c.detail ?? "check failed" },
+            );
           }
         }
       }
