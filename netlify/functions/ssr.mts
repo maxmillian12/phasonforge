@@ -1,30 +1,21 @@
-// Netlify Function (v2) — wraps TanStack Start's SSR handler for Node runtime.
+// Netlify Function (v2) — wraps the built TanStack Start SSR bundle.
 //
-// IMPORTANT: For this to actually be invoked on Netlify, the project must be
-// built WITHOUT the Cloudflare Workers adapter so the SSR bundle targets Node.
-// See README → "Deploy to Netlify" for the one-time vite.config.ts swap.
+// The Vite build (NETLIFY=true) emits dist/server/server.js as a fully
+// self-contained ESM module whose default export has `.fetch(request)`.
+// We import it statically so esbuild bundles it into the function output.
 import type { Context } from "@netlify/functions";
+// @ts-expect-error - built artifact, only present after `vite build`
+import ssrHandler from "../../dist/server/server.js";
 
 type ServerEntry = {
   fetch: (request: Request, env?: unknown, ctx?: unknown) => Promise<Response> | Response;
 };
 
-let entryPromise: Promise<ServerEntry> | undefined;
-
-async function getEntry(): Promise<ServerEntry> {
-  if (!entryPromise) {
-    // The TanStack Start build emits this virtual module as the SSR entry.
-    entryPromise = import("@tanstack/react-start/server-entry").then(
-      (m) => ((m as { default?: ServerEntry }).default ?? (m as unknown as ServerEntry)),
-    );
-  }
-  return entryPromise;
-}
+const handler = ssrHandler as ServerEntry;
 
 export default async (request: Request, _context: Context): Promise<Response> => {
   try {
-    const entry = await getEntry();
-    return await entry.fetch(request);
+    return await handler.fetch(request);
   } catch (error) {
     console.error("[ssr] unhandled error:", error);
     return new Response(
