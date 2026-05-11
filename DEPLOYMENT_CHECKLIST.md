@@ -32,6 +32,78 @@ function at runtime (`src/integrations/supabase/client.server.ts`,
 
 ---
 
+## 1b. Netlify function & route wiring (must match exactly)
+
+The SSR pipeline depends on three pieces lining up. If any drift, deep links
+404, the function fails to bundle, or static assets get swallowed by SSR.
+
+### `netlify.toml` (project root)
+
+```toml
+[build]
+  command = "bun run build"
+  publish = "dist/client"          # Vite client build output
+  functions = "netlify/functions"  # where Netlify discovers functions
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  node_bundler = "esbuild"         # required: bundles dist/server/server.js into the function
+
+# Belt-and-suspenders SPA fallback. The function ALSO declares config.path = "/*"
+# (see below), so this redirect is redundant but harmless. Keep it: if the
+# function config is ever removed, this still routes unmatched URLs to SSR.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/ssr"
+  status = 200
+  force = false                    # static assets in dist/client win first
+```
+
+### `netlify/functions/ssr.mts`
+
+| Aspect | Value | Why |
+|---|---|---|
+| File path | `netlify/functions/ssr.mts` | Filename `ssr` → function name `ssr` → invoke URL `/.netlify/functions/ssr` |
+| Function name | `ssr` | Must match the redirect target in `netlify.toml` |
+| Route config | `export const config = { path: "/*" }` | Netlify Functions v2 — routes every request to this handler |
+| Built bundle import | `import ssrHandler from "../../dist/server/server.js"` | Static import so esbuild inlines the SSR bundle at deploy time |
+| Handler shape | `default async (request, context) => Response` | Web fetch; delegates to `ssrHandler.fetch(request)` |
+| Error fallback | try/catch returning branded HTML 500 | Prevents `{"unhandled":true}` JSON from leaking to users |
+
+### Path-matching truth table
+
+| Incoming URL | Resolved by | Notes |
+|---|---|---|
+| `/assets/index-abc123.js` | static (`dist/client/assets/...`) | publish dir wins; long-cached via `[[headers]]` |
+| `/favicon.ico`, `/robots.txt` | static | served from `dist/client` |
+| `/`, `/about`, `/services/*` | SSR function (`ssr`) | rendered by TanStack Start |
+| `/api/health`, `/api/contact` | SSR function (`ssr`) | TanStack server routes inside the same handler |
+| `/this-does-not-exist` | SSR function → branded 404 | matches `__root` notFoundComponent |
+
+### Verify the wiring after a deploy
+
+```sh
+# 1. Function is discoverable
+curl -sI https://YOUR-SITE.netlify.app/.netlify/functions/ssr | head -1
+# Expect: HTTP/2 200 (or 405 if GET-on-POST route, never 404)
+
+# 2. Pretty URL routes through the same function
+curl -sI https://YOUR-SITE.netlify.app/services | head -1
+# Expect: HTTP/2 200, content-type text/html
+
+# 3. Static asset is NOT swallowed by SSR
+curl -sI https://YOUR-SITE.netlify.app/favicon.ico | grep -i cache-control
+# Expect: a long-cache header from the static layer, not text/html
+```
+
+If any of those fail, check in order: function name in `netlify.toml` redirect
+matches the file at `netlify/functions/ssr.mts` → `dist/server/server.js`
+exists in the build output → `node_bundler = "esbuild"` is set.
+
+---
+
 ## 2. Pre-deploy verification (local)
 
 Run from the project root:
