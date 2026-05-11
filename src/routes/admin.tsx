@@ -78,6 +78,7 @@ function AdminDashboard() {
           <ManageCard title="Inquiries" desc="View contact submissions" to="/contact" />
           <ManageCard title="Site Settings" desc="Company info & branding" to="/" icon={Settings} />
           <ManageCard title="System Status" desc="Verify forms, auth & storage" to="/admin/status" icon={Settings} />
+          <ManageCard title="Deploy Verify" desc="SSR wiring & endpoint health checks" to="/admin/deploy-verify" icon={Settings} />
         </div>
       </div>
     </div>
