@@ -24,6 +24,7 @@ import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiContactRouteImport } from './routes/api/contact'
 import { Route as AdminStatusRouteImport } from './routes/admin.status'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminDeployVerifyRouteImport } from './routes/admin.deploy-verify'
 
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
@@ -100,6 +101,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDeployVerifyRoute = AdminDeployVerifyRouteImport.update({
+  id: '/deploy-verify',
+  path: '/deploy-verify',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
+  '/admin/deploy-verify': typeof AdminDeployVerifyRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/status': typeof AdminStatusRoute
   '/api/contact': typeof ApiContactRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
+  '/admin/deploy-verify': typeof AdminDeployVerifyRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/status': typeof AdminStatusRoute
   '/api/contact': typeof ApiContactRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/projects': typeof ProjectsRoute
+  '/admin/deploy-verify': typeof AdminDeployVerifyRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/status': typeof AdminStatusRoute
   '/api/contact': typeof ApiContactRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/projects'
+    | '/admin/deploy-verify'
     | '/admin/login'
     | '/admin/status'
     | '/api/contact'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/projects'
+    | '/admin/deploy-verify'
     | '/admin/login'
     | '/admin/status'
     | '/api/contact'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/projects'
+    | '/admin/deploy-verify'
     | '/admin/login'
     | '/admin/status'
     | '/api/contact'
@@ -330,15 +342,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/deploy-verify': {
+      id: '/admin/deploy-verify'
+      path: '/deploy-verify'
+      fullPath: '/admin/deploy-verify'
+      preLoaderRoute: typeof AdminDeployVerifyRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminDeployVerifyRoute: typeof AdminDeployVerifyRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStatusRoute: typeof AdminStatusRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDeployVerifyRoute: AdminDeployVerifyRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStatusRoute: AdminStatusRoute,
 }
