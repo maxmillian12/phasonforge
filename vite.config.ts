@@ -12,6 +12,7 @@
 // (https://docs.netlify.com/configure-builds/environment-variables/#read-only-variables)
 
 import type { UserConfig } from "vite";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
 const isNetlify = process.env.NETLIFY === "true";
 
@@ -34,6 +35,7 @@ async function netlifyConfig(): Promise<UserConfig> {
         server: { entry: "server" },
       }),
       viteReact(),
+      mcpPlugin(),
     ],
     resolve: {
       alias: { "@": "/src" },
@@ -48,6 +50,7 @@ async function netlifyConfig(): Promise<UserConfig> {
 async function lovableConfig(): Promise<UserConfig> {
   const { defineConfig } = await import("@lovable.dev/vite-tanstack-config");
   return defineConfig({
+    plugins: [mcpPlugin()],
     tanstackStart: {
       server: { entry: "server" },
     },
